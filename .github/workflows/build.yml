@@ -18,21 +18,15 @@ jobs:
           mkdir -p app/src/main/res/layout
           mkdir -p app/src/main/res/xml
           mkdir -p app/src/main/res/values
+          mkdir -p app/src/main/res/drawable
 
           cat << 'EOF' > settings.gradle
           pluginManagement {
-              repositories {
-                  google()
-                  mavenCentral()
-                  gradlePluginPortal()
-              }
+              repositories { google(); mavenCentral(); gradlePluginPortal() }
           }
           dependencyResolutionManagement {
               repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
-              repositories {
-                  google()
-                  mavenCentral()
-              }
+              repositories { google(); mavenCentral() }
           }
           rootProject.name = "TTZCleaner"
           include ':app'
@@ -57,33 +51,22 @@ jobs:
               id 'com.android.application'
               id 'org.jetbrains.kotlin.android'
           }
-
           android {
               namespace 'com.ttz.ttz'
               compileSdk 34
-
               defaultConfig {
                   applicationId "com.ttz.ttz"
                   minSdk 26
                   targetSdk 34
-                  versionCode 1
-                  versionName "1.0"
-              }
-
-              buildTypes {
-                  release {
-                      minifyEnabled false
-                  }
+                  versionCode 3
+                  versionName "3.0"
               }
               compileOptions {
                   sourceCompatibility JavaVersion.VERSION_17
                   targetCompatibility JavaVersion.VERSION_17
               }
-              kotlinOptions {
-                  jvmTarget = '17'
-              }
+              kotlinOptions { jvmTarget = '17' }
           }
-
           dependencies {
               implementation 'androidx.core:core-ktx:1.12.0'
               implementation 'androidx.appcompat:appcompat:1.6.1'
@@ -96,25 +79,19 @@ jobs:
           <?xml version="1.0" encoding="utf-8"?>
           <manifest xmlns:android="http://schemas.android.com/apk/res/android"
               xmlns:tools="http://schemas.android.com/tools">
-
               <uses-permission android:name="android.permission.PACKAGE_USAGE_STATS" tools:ignore="ProtectedPermissions" />
               <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES" tools:ignore="QueryAllPackagesPermission" />
-
               <application
                   android:allowBackup="true"
                   android:label="TTZ Cleaner"
                   android:supportsRtl="true"
                   android:theme="@style/Theme.MaterialComponents.DayNight.DarkActionBar">
-
-                  <activity
-                      android:name=".MainActivity"
-                      android:exported="true">
+                  <activity android:name=".MainActivity" android:exported="true">
                       <intent-filter>
                           <action android:name="android.intent.action.MAIN" />
                           <category android:name="android.intent.category.LAUNCHER" />
                       </intent-filter>
                   </activity>
-
                   <service
                       android:name=".CacheCleanerService"
                       android:exported="true"
@@ -127,7 +104,6 @@ jobs:
                           android:name="android.accessibilityservice"
                           android:resource="@xml/accessibility_service_config" />
                   </service>
-
               </application>
           </manifest>
           EOF
@@ -135,20 +111,89 @@ jobs:
           cat << 'EOF' > app/src/main/res/xml/accessibility_service_config.xml
           <?xml version="1.0" encoding="utf-8"?>
           <accessibility-service xmlns:android="http://schemas.android.com/apk/res/android"
-              android:accessibilityEventTypes="typeWindowStateChanged|typeWindowContentChanged"
+              android:accessibilityEventTypes="typeAllMask"
               android:accessibilityFeedbackType="feedbackGeneric"
-              android:accessibilityFlags="flagDefault|flagIncludeNotImportantViews|flagReportViewIds"
+              android:accessibilityFlags="flagDefault|flagIncludeNotImportantViews|flagReportViewIds|flagRetrieveInteractiveWindows"
               android:canPerformGestures="true"
               android:canRetrieveWindowContent="true"
               android:description="@string/acc_desc"
-              android:notificationTimeout="100" />
+              android:notificationTimeout="50" />
           EOF
 
           cat << 'EOF' > app/src/main/res/values/strings.xml
           <resources>
               <string name="app_name">TTZ Cleaner</string>
-              <string name="acc_desc">Automatically clicks Storage and Clear Cache buttons in system settings.</string>
+              <string name="acc_desc">Auto-clicks Storage and Clear Cache buttons.</string>
           </resources>
+          EOF
+
+          cat << 'EOF' > app/src/main/res/drawable/bg_overlay.xml
+          <?xml version="1.0" encoding="utf-8"?>
+          <shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="rectangle">
+              <solid android:color="#EE1E1F22" />
+              <corners android:radius="14dp" />
+              <stroke android:width="1dp" android:color="#55FFFFFF" />
+          </shape>
+          EOF
+
+          cat << 'EOF' > app/src/main/res/layout/overlay_progress.xml
+          <?xml version="1.0" encoding="utf-8"?>
+          <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:layout_width="250dp"
+              android:layout_height="wrap_content"
+              android:background="@drawable/bg_overlay"
+              android:orientation="vertical"
+              android:padding="12dp">
+              <ProgressBar
+                  android:id="@+id/pbOverlay"
+                  style="?android:attr/progressBarStyleHorizontal"
+                  android:layout_width="match_parent"
+                  android:layout_height="4dp"
+                  android:max="100"
+                  android:progress="20"
+                  android:progressTint="#8AB4F8" />
+              <TextView
+                  android:id="@+id/tvStepStatus"
+                  android:layout_width="match_parent"
+                  android:layout_height="wrap_content"
+                  android:layout_marginTop="8dp"
+                  android:gravity="center"
+                  android:text="#1, wait 1s"
+                  android:textColor="#FFFFFF"
+                  android:textSize="13sp"
+                  android:textStyle="bold" />
+              <View
+                  android:layout_width="match_parent"
+                  android:layout_height="1dp"
+                  android:layout_marginTop="8dp"
+                  android:layout_marginBottom="8dp"
+                  android:background="#33FFFFFF" />
+              <LinearLayout
+                  android:layout_width="match_parent"
+                  android:layout_height="wrap_content"
+                  android:gravity="center_vertical"
+                  android:orientation="horizontal">
+                  <TextView
+                      android:id="@+id/tvCount"
+                      android:layout_width="wrap_content"
+                      android:layout_height="wrap_content"
+                      android:text="1 / 1"
+                      android:textColor="#CCCCCC"
+                      android:textSize="13sp" />
+                  <TextView
+                      android:id="@+id/tvCurrentApp"
+                      android:layout_width="0dp"
+                      android:layout_height="wrap_content"
+                      android:layout_marginStart="10dp"
+                      android:layout_weight="1"
+                      android:ellipsize="end"
+                      android:gravity="center"
+                      android:maxLines="2"
+                      android:text="Clear cache..."
+                      android:textColor="#CCCCCC"
+                      android:textSize="13sp" />
+              </LinearLayout>
+          </LinearLayout>
           EOF
 
           cat << 'EOF' > app/src/main/res/layout/activity_main.xml
@@ -159,23 +204,20 @@ jobs:
               android:background="#1E1F22"
               android:orientation="vertical"
               android:padding="16dp">
-
               <LinearLayout
                   android:layout_width="match_parent"
                   android:layout_height="wrap_content"
                   android:background="#2B2D30"
                   android:orientation="vertical"
                   android:padding="16dp">
-
                   <TextView
                       android:id="@+id/tvStorageStats"
                       android:layout_width="match_parent"
                       android:layout_height="wrap_content"
                       android:text="Calculating Storage..."
                       android:textColor="#FFFFFF"
-                      android:textSize="16sp"
+                      android:textSize="15sp"
                       android:textStyle="bold" />
-
                   <TextView
                       android:id="@+id/tvTotalCache"
                       android:layout_width="match_parent"
@@ -185,24 +227,18 @@ jobs:
                       android:textColor="#FBC02D"
                       android:textSize="15sp"
                       android:textStyle="bold" />
-
                   <LinearLayout
                       android:layout_width="match_parent"
                       android:layout_height="wrap_content"
                       android:layout_marginTop="12dp"
                       android:orientation="horizontal">
-
                       <Button
                           android:id="@+id/btnPermissions"
                           android:layout_width="0dp"
                           android:layout_height="wrap_content"
                           android:layout_weight="1"
                           android:text="1. Permissions" />
-
-                      <Space
-                          android:layout_width="8dp"
-                          android:layout_height="wrap_content" />
-
+                      <Space android:layout_width="8dp" android:layout_height="wrap_content" />
                       <Button
                           android:id="@+id/btnScan"
                           android:layout_width="0dp"
@@ -211,14 +247,12 @@ jobs:
                           android:text="2. Scan Apps" />
                   </LinearLayout>
               </LinearLayout>
-
               <androidx.recyclerview.widget.RecyclerView
                   android:id="@+id/rvApps"
                   android:layout_width="match_parent"
                   android:layout_height="0dp"
                   android:layout_marginTop="12dp"
                   android:layout_weight="1" />
-
               <Button
                   android:id="@+id/btnCleanAll"
                   android:layout_width="match_parent"
@@ -228,7 +262,6 @@ jobs:
                   android:text="3. Auto Clean Cache (Turbo)"
                   android:textColor="#FFFFFF"
                   android:textStyle="bold" />
-
           </LinearLayout>
           EOF
 
@@ -240,40 +273,17 @@ jobs:
               android:gravity="center_vertical"
               android:orientation="horizontal"
               android:padding="10dp">
-
-              <ImageView
-                  android:id="@+id/ivIcon"
-                  android:layout_width="40dp"
-                  android:layout_height="40dp" />
-
+              <ImageView android:id="@+id/ivIcon" android:layout_width="40dp" android:layout_height="40dp" />
               <LinearLayout
                   android:layout_width="0dp"
                   android:layout_height="wrap_content"
                   android:layout_marginStart="12dp"
                   android:layout_weight="1"
                   android:orientation="vertical">
-
-                  <TextView
-                      android:id="@+id/tvAppName"
-                      android:layout_width="wrap_content"
-                      android:layout_height="wrap_content"
-                      android:textColor="#FFFFFF"
-                      android:textSize="15sp"
-                      android:textStyle="bold" />
-
-                  <TextView
-                      android:id="@+id/tvCacheSize"
-                      android:layout_width="wrap_content"
-                      android:layout_height="wrap_content"
-                      android:textColor="#AAAAAA"
-                      android:textSize="13sp" />
+                  <TextView android:id="@+id/tvAppName" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="#FFFFFF" android:textSize="15sp" android:textStyle="bold" />
+                  <TextView android:id="@+id/tvCacheSize" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="#AAAAAA" android:textSize="13sp" />
               </LinearLayout>
-
-              <CheckBox
-                  android:id="@+id/cbSelect"
-                  android:layout_width="wrap_content"
-                  android:layout_height="wrap_content"
-                  android:checked="true" />
+              <CheckBox android:id="@+id/cbSelect" android:layout_width="wrap_content" android:layout_height="wrap_content" android:checked="true" />
           </LinearLayout>
           EOF
 
@@ -281,60 +291,205 @@ jobs:
           package com.ttz.ttz
 
           import android.accessibilityservice.AccessibilityService
+          import android.accessibilityservice.GestureDescription
+          import android.content.Context
           import android.content.Intent
+          import android.graphics.Path
+          import android.graphics.PixelFormat
+          import android.graphics.Rect
           import android.net.Uri
           import android.os.Handler
           import android.os.Looper
           import android.provider.Settings
+          import android.view.Gravity
+          import android.view.LayoutInflater
+          import android.view.View
+          import android.view.WindowManager
           import android.view.accessibility.AccessibilityEvent
           import android.view.accessibility.AccessibilityNodeInfo
+          import android.widget.ProgressBar
+          import android.widget.TextView
           import android.widget.Toast
 
-          class CacheCleanerService : AccessibilityService() {
+          data class CleanTarget(val appName: String, val packageName: String)
 
+          class CacheCleanerService : AccessibilityService() {
               companion object {
+                  var instance: CacheCleanerService? = null
                   var isCleaning = false
-                  val packageQueue = mutableListOf<String>()
+                  val queue = mutableListOf<CleanTarget>()
                   var totalToClean = 0
                   var currentIndex = 0
               }
 
               private val handler = Handler(Looper.getMainLooper())
+              private var windowManager: WindowManager? = null
+              private var overlayView: View? = null
+              private var pbOverlay: ProgressBar? = null
+              private var tvStepStatus: TextView? = null
+              private var tvCount: TextView? = null
+              private var tvCurrentApp: TextView? = null
+              private var currentTarget: CleanTarget? = null
               private var step = 0
+              private var subTick = 0
 
-              override fun onAccessibilityEvent(event: AccessibilityEvent?) {
-                  if (!isCleaning || event == null) return
-                  val rootNode = rootInActiveWindow ?: return
+              private val ticker = object : Runnable {
+                  override fun run() {
+                      if (!isCleaning) return
+                      subTick++
+                      runAutomationTick()
+                      handler.postDelayed(this, 550)
+                  }
+              }
 
-                  if (step == 0) {
-                      if (findAndClick(rootNode, listOf("Storage & cache", "Storage", "Storage usage"))) {
-                          step = 1
+              override fun onServiceConnected() { super.onServiceConnected(); instance = this }
+              override fun onUnbind(intent: Intent?): Boolean { instance = null; hideOverlay(); return super.onUnbind(intent) }
+              override fun onAccessibilityEvent(event: AccessibilityEvent?) {}
+              override fun onInterrupt() { stopCleaning() }
+
+              fun startCleaningProcess() {
+                  if (queue.isEmpty()) return
+                  isCleaning = true
+                  totalToClean = queue.size
+                  currentIndex = 0
+                  showOverlay()
+                  launchNextApp()
+                  handler.removeCallbacks(ticker)
+                  handler.postDelayed(ticker, 700)
+              }
+
+              fun stopCleaning() {
+                  isCleaning = false
+                  handler.removeCallbacks(ticker)
+                  hideOverlay()
+              }
+
+              private fun showOverlay() {
+                  if (overlayView != null) return
+                  try {
+                      windowManager = getSystemService(Context.WINDOW_SERVICE) as WindowManager
+                      overlayView = LayoutInflater.from(this).inflate(R.layout.overlay_progress, null)
+                      pbOverlay = overlayView?.findViewById(R.id.pbOverlay)
+                      tvStepStatus = overlayView?.findViewById(R.id.tvStepStatus)
+                      tvCount = overlayView?.findViewById(R.id.tvCount)
+                      tvCurrentApp = overlayView?.findViewById(R.id.tvCurrentApp)
+
+                      val params = WindowManager.LayoutParams(
+                          WindowManager.LayoutParams.WRAP_CONTENT,
+                          WindowManager.LayoutParams.WRAP_CONTENT,
+                          WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY,
+                          WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
+                          PixelFormat.TRANSLUCENT
+                      ).apply {
+                          gravity = Gravity.BOTTOM or Gravity.END
+                          x = 32
+                          y = 140
                       }
-                  } else if (step == 1) {
-                      if (findAndClick(rootNode, listOf("Clear cache"))) {
-                          step = 2
-                          handler.postDelayed({
-                              performGlobalAction(GLOBAL_ACTION_BACK)
-                              handler.postDelayed({
-                                  performGlobalAction(GLOBAL_ACTION_BACK)
-                                  processNextApp()
-                              }, 600)
-                          }, 700)
+                      windowManager?.addView(overlayView, params)
+                  } catch (_: Exception) {}
+              }
+
+              private fun updateOverlayUI(stepText: String, progress: Int) {
+                  handler.post {
+                      val t = currentTarget ?: return@post
+                      pbOverlay?.progress = progress
+                      tvStepStatus?.text = stepText
+                      tvCount?.text = "$currentIndex / $totalToClean"
+                      tvCurrentApp?.text = "Clear cache: ${t.appName}"
+                  }
+              }
+
+              private fun hideOverlay() {
+                  handler.post {
+                      if (overlayView != null) {
+                          try { windowManager?.removeView(overlayView) } catch (_: Exception) {}
+                          overlayView = null
                       }
                   }
               }
 
-              private fun findAndClick(node: AccessibilityNodeInfo, targets: List<String>): Boolean {
-                  for (target in targets) {
-                      val nodes = node.findAccessibilityNodeInfosByText(target)
-                      for (n in nodes) {
-                          if (n.text != null && n.text.toString().contains(target, ignoreCase = true)) {
-                              var clickable: AccessibilityNodeInfo? = n
-                              while (clickable != null && !clickable.isClickable) {
-                                  clickable = clickable.parent
+              private fun launchNextApp() {
+                  if (queue.isEmpty()) {
+                      stopCleaning()
+                      Toast.makeText(this, "All selected caches cleared!", Toast.LENGTH_LONG).show()
+                      return
+                  }
+                  currentTarget = queue.removeAt(0)
+                  currentIndex++
+                  step = 0
+                  subTick = 0
+                  updateOverlayUI("#1, wait 1s", 20)
+
+                  val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                      data = Uri.parse("package:${currentTarget!!.packageName}")
+                      addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                  }
+                  startActivity(intent)
+              }
+
+              private fun runAutomationTick() {
+                  val root = rootInActiveWindow ?: return
+                  if (step == 0) {
+                      updateOverlayUI("#$subTick, wait 5s", 35)
+                      if (hasNodeText(root, listOf("Clear cache", "Clear storage"))) {
+                          step = 1; subTick = 0; return
+                      }
+                      if (findAndClickNode(root, listOf("Storage & cache", "Storage", "Storage usage"))) {
+                          step = 1; subTick = 0
+                          updateOverlayUI("#3, wait 5s", 65)
+                      } else if (subTick > 5) {
+                          root.performAction(AccessibilityNodeInfo.ACTION_SCROLL_FORWARD)
+                      }
+                      if (subTick > 11) {
+                          step = 2
+                          performGlobalAction(GLOBAL_ACTION_BACK)
+                          handler.postDelayed({ launchNextApp() }, 500)
+                      }
+                  } else if (step == 1) {
+                      updateOverlayUI("#${subTick + 3}, wait 1s", 85)
+                      if (findAndClickNode(root, listOf("Clear cache")) || subTick > 5) {
+                          step = 2
+                          updateOverlayUI("#9, wait 5s", 100)
+                          handler.postDelayed({
+                              performGlobalAction(GLOBAL_ACTION_BACK)
+                              handler.postDelayed({
+                                  performGlobalAction(GLOBAL_ACTION_BACK)
+                                  handler.postDelayed({ launchNextApp() }, 450)
+                              }, 450)
+                          }, 500)
+                      }
+                  }
+              }
+
+              private fun hasNodeText(root: AccessibilityNodeInfo, keywords: List<String>): Boolean {
+                  val list = mutableListOf<AccessibilityNodeInfo>()
+                  collectNodes(root, list)
+                  return list.any { n ->
+                      val t = n.text?.toString() ?: ""
+                      keywords.any { kw -> t.contains(kw, ignoreCase = true) }
+                  }
+              }
+
+              private fun findAndClickNode(root: AccessibilityNodeInfo, keywords: List<String>): Boolean {
+                  val allNodes = mutableListOf<AccessibilityNodeInfo>()
+                  collectNodes(root, allNodes)
+                  for (kw in keywords) {
+                      for (node in allNodes) {
+                          val text = node.text?.toString() ?: ""
+                          val desc = node.contentDescription?.toString() ?: ""
+                          if (text.contains(kw, ignoreCase = true) || desc.contains(kw, ignoreCase = true)) {
+                              var target: AccessibilityNodeInfo? = node
+                              while (target != null && !target.isClickable) target = target.parent
+                              if (target != null && target.isEnabled && target.performAction(AccessibilityNodeInfo.ACTION_CLICK)) {
+                                  return true
                               }
-                              if (clickable != null && clickable.isEnabled) {
-                                  clickable.performAction(AccessibilityNodeInfo.ACTION_CLICK)
+                              val rect = Rect()
+                              node.getBoundsInScreen(rect)
+                              if (!rect.isEmpty && rect.centerX() > 0 && rect.centerY() > 0) {
+                                  val path = Path().apply { moveTo(rect.centerX().toFloat(), rect.centerY().toFloat()) }
+                                  val gesture = GestureDescription.Builder()
+                                      .addStroke(GestureDescription.StrokeDescription(path, 0, 80)).build()
+                                  dispatchGesture(gesture, null, null)
                                   return true
                               }
                           }
@@ -343,45 +498,10 @@ jobs:
                   return false
               }
 
-              fun startQueue() {
-                  if (packageQueue.isEmpty()) {
-                      isCleaning = false
-                      Toast.makeText(this, "All selected caches cleared!", Toast.LENGTH_LONG).show()
-                      return
-                  }
-                  isCleaning = true
-                  totalToClean = packageQueue.size
-                  currentIndex = 0
-                  processNextApp()
-              }
-
-              private fun processNextApp() {
-                  if (packageQueue.isEmpty()) {
-                      isCleaning = false
-                      Toast.makeText(this, "Finished cleaning!", Toast.LENGTH_LONG).show()
-                      return
-                  }
-                  val pkg = packageQueue.removeAt(0)
-                  currentIndex++
-                  step = 0
-                  Toast.makeText(this, "[$currentIndex/$totalToClean] Cleaning: $pkg", Toast.LENGTH_SHORT).show()
-
-                  val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
-                      data = Uri.parse("package:$pkg")
-                      addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                  }
-                  startActivity(intent)
-              }
-
-              override fun onInterrupt() {
-                  isCleaning = false
-              }
-
-              override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-                  if (intent?.action == "START_CLEAN") {
-                      startQueue()
-                  }
-                  return super.onStartCommand(intent, flags, startId)
+              private fun collectNodes(node: AccessibilityNodeInfo?, out: MutableList<AccessibilityNodeInfo>) {
+                  if (node == null) return
+                  out.add(node)
+                  for (i in 0 until node.childCount) collectNodes(node.getChild(i), out)
               }
           }
           EOF
@@ -391,6 +511,7 @@ jobs:
 
           import android.app.AppOpsManager
           import android.app.usage.StorageStatsManager
+          import android.content.ComponentName
           import android.content.Context
           import android.content.Intent
           import android.graphics.drawable.Drawable
@@ -400,6 +521,7 @@ jobs:
           import android.os.StatFs
           import android.os.storage.StorageManager
           import android.provider.Settings
+          import android.text.TextUtils
           import android.text.format.Formatter
           import android.view.LayoutInflater
           import android.view.View
@@ -410,16 +532,9 @@ jobs:
           import androidx.recyclerview.widget.RecyclerView
           import kotlin.concurrent.thread
 
-          data class AppCacheItem(
-              val appName: String,
-              val packageName: String,
-              val icon: Drawable,
-              val cacheBytes: Long,
-              var selected: Boolean = true
-          )
+          data class AppCacheItem(val appName: String, val packageName: String, val icon: Drawable, val cacheBytes: Long, var selected: Boolean = true)
 
           class MainActivity : AppCompatActivity() {
-
               private lateinit var tvStorageStats: TextView
               private lateinit var tvTotalCache: TextView
               private lateinit var rvApps: RecyclerView
@@ -429,16 +544,17 @@ jobs:
               override fun onCreate(savedInstanceState: Bundle?) {
                   super.onCreate(savedInstanceState)
                   setContentView(R.layout.activity_main)
-
                   tvStorageStats = findViewById(R.id.tvStorageStats)
                   tvTotalCache = findViewById(R.id.tvTotalCache)
                   rvApps = findViewById(R.id.rvApps)
-
                   adapter = AppAdapter(appList)
                   rvApps.layoutManager = LinearLayoutManager(this)
                   rvApps.adapter = adapter
 
-                  updateInternalStorageStats()
+                  val stat = StatFs(Environment.getDataDirectory().path)
+                  val used = stat.totalBytes - stat.availableBytes
+                  val pct = ((used.toDouble() / stat.totalBytes.toDouble()) * 100).toInt()
+                  tvStorageStats.text = "TOTAL: ${Formatter.formatFileSize(this, stat.totalBytes)} | USED: ${Formatter.formatFileSize(this, used)} ($pct%) | FREE: ${Formatter.formatFileSize(this, stat.availableBytes)}"
 
                   findViewById<Button>(R.id.btnPermissions).setOnClickListener {
                       if (!hasUsageStatsPermission()) {
@@ -452,7 +568,6 @@ jobs:
 
                   findViewById<Button>(R.id.btnScan).setOnClickListener {
                       if (!hasUsageStatsPermission()) {
-                          Toast.makeText(this, "Please grant Usage Access Permission first!", Toast.LENGTH_SHORT).show()
                           startActivity(Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS))
                           return@setOnClickListener
                       }
@@ -460,116 +575,89 @@ jobs:
                   }
 
                   findViewById<Button>(R.id.btnCleanAll).setOnClickListener {
-                      val selectedApps = appList.filter { it.selected }.map { it.packageName }
-                      if (selectedApps.isEmpty()) {
-                          Toast.makeText(this, "Scan and select apps first!", Toast.LENGTH_SHORT).show()
+                      if (!isAccessibilityEnabled()) {
+                          Toast.makeText(this, "Turn ON 'TTZ Auto Cache Cleaner' in Accessibility!", Toast.LENGTH_LONG).show()
+                          startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))
                           return@setOnClickListener
                       }
-                      CacheCleanerService.packageQueue.clear()
-                      CacheCleanerService.packageQueue.addAll(selectedApps)
-
-                      val serviceIntent = Intent(this, CacheCleanerService::class.java).apply {
-                          action = "START_CLEAN"
+                      val selected = appList.filter { it.selected }.map { CleanTarget(it.appName, it.packageName) }
+                      if (selected.isEmpty()) {
+                          Toast.makeText(this, "Scan apps first!", Toast.LENGTH_SHORT).show()
+                          return@setOnClickListener
                       }
-                      startService(serviceIntent)
+                      val svc = CacheCleanerService.instance
+                      if (svc == null) {
+                          Toast.makeText(this, "Please turn Accessibility OFF and ON once.", Toast.LENGTH_LONG).show()
+                          startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))
+                          return@setOnClickListener
+                      }
+                      CacheCleanerService.queue.clear()
+                      CacheCleanerService.queue.addAll(selected)
+                      svc.startCleaningProcess()
                   }
               }
 
-              private fun updateInternalStorageStats() {
-                  val stat = StatFs(Environment.getDataDirectory().path)
-                  val totalBytes = stat.totalBytes
-                  val availBytes = stat.availableBytes
-                  val usedBytes = totalBytes - availBytes
-                  val usedPercent = ((usedBytes.toDouble() / totalBytes.toDouble()) * 100).toInt()
-
-                  tvStorageStats.text = "TOTAL: ${Formatter.formatFileSize(this, totalBytes)} | " +
-                          "USED: ${Formatter.formatFileSize(this, usedBytes)} ($usedPercent%) | " +
-                          "FREE: ${Formatter.formatFileSize(this, availBytes)}"
+              private fun isAccessibilityEnabled(): Boolean {
+                  val expected = ComponentName(this, CacheCleanerService::class.java)
+                  val enabled = Settings.Secure.getString(contentResolver, Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES) ?: return false
+                  val splitter = TextUtils.SimpleStringSplitter(':')
+                  splitter.setString(enabled)
+                  while (splitter.hasNext()) {
+                      if (ComponentName.unflattenFromString(splitter.next()) == expected) return true
+                  }
+                  return false
               }
 
               private fun hasUsageStatsPermission(): Boolean {
                   val appOps = getSystemService(Context.APP_OPS_SERVICE) as AppOpsManager
-                  val mode = appOps.checkOpNoThrow(
-                      AppOpsManager.OPSTR_GET_USAGE_STATS,
-                      Process.myUid(),
-                      packageName
-                  )
-                  return mode == AppOpsManager.MODE_ALLOWED
+                  return appOps.checkOpNoThrow(AppOpsManager.OPSTR_GET_USAGE_STATS, Process.myUid(), packageName) == AppOpsManager.MODE_ALLOWED
               }
 
               private fun scanInstalledApps() {
                   tvTotalCache.text = "Calculating package sizes..."
                   appList.clear()
                   adapter.notifyDataSetChanged()
-
                   thread {
-                      val storageStatsManager = getSystemService(Context.STORAGE_STATS_SERVICE) as StorageStatsManager
+                      val ssm = getSystemService(Context.STORAGE_STATS_SERVICE) as StorageStatsManager
                       val pm = packageManager
-                      val packages = pm.getInstalledApplications(0)
                       var totalCache = 0L
-                      val tempList = mutableListOf<AppCacheItem>()
-
-                      for (app in packages) {
+                      val temp = mutableListOf<AppCacheItem>()
+                      for (app in pm.getInstalledApplications(0)) {
                           try {
-                              val stats = storageStatsManager.queryStatsForPackage(
-                                  StorageManager.UUID_DEFAULT,
-                                  app.packageName,
-                                  Process.myUserHandle()
-                              )
-                              val cache = stats.cacheBytes
+                              val cache = ssm.queryStatsForPackage(StorageManager.UUID_DEFAULT, app.packageName, Process.myUserHandle()).cacheBytes
                               if (cache > 1024 * 1024 && app.packageName != packageName) {
                                   totalCache += cache
-                                  tempList.add(
-                                      AppCacheItem(
-                                          appName = pm.getApplicationLabel(app).toString(),
-                                          packageName = app.packageName,
-                                          icon = pm.getApplicationIcon(app),
-                                          cacheBytes = cache
-                                      )
-                                  )
+                                  temp.add(AppCacheItem(pm.getApplicationLabel(app).toString(), app.packageName, pm.getApplicationIcon(app), cache))
                               }
-                          } catch (_: Exception) {
-                          }
+                          } catch (_: Exception) {}
                       }
-
-                      tempList.sortByDescending { it.cacheBytes }
-
+                      temp.sortByDescending { it.cacheBytes }
                       runOnUiThread {
-                          appList.addAll(tempList)
+                          appList.addAll(temp)
                           adapter.notifyDataSetChanged()
                           tvTotalCache.text = "LARGE CACHE: ${Formatter.formatFileSize(this, totalCache)} (${appList.size} apps)"
                       }
                   }
               }
 
-              inner class AppAdapter(private val items: List<AppCacheItem>) :
-                  RecyclerView.Adapter<AppAdapter.VH>() {
-
+              inner class AppAdapter(private val items: List<AppCacheItem>) : RecyclerView.Adapter<AppAdapter.VH>() {
                   inner class VH(v: View) : RecyclerView.ViewHolder(v) {
                       val ivIcon: ImageView = v.findViewById(R.id.ivIcon)
                       val tvAppName: TextView = v.findViewById(R.id.tvAppName)
                       val tvCacheSize: TextView = v.findViewById(R.id.tvCacheSize)
                       val cbSelect: CheckBox = v.findViewById(R.id.cbSelect)
                   }
-
-                  override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VH {
-                      val v = LayoutInflater.from(parent.context).inflate(R.layout.item_app, parent, false)
-                      return VH(v)
+                  override fun onCreateViewHolder(p: ViewGroup, t: Int) = VH(LayoutInflater.from(p.context).inflate(R.layout.item_app, p, false))
+                  override fun onBindViewHolder(h: VH, pos: Int) {
+                      val item = items[pos]
+                      h.ivIcon.setImageDrawable(item.icon)
+                      h.tvAppName.text = item.appName
+                      h.tvCacheSize.text = "Cache ${Formatter.formatFileSize(this@MainActivity, item.cacheBytes)}"
+                      h.cbSelect.setOnCheckedChangeListener(null)
+                      h.cbSelect.isChecked = item.selected
+                      h.cbSelect.setOnCheckedChangeListener { _, c -> item.selected = c }
                   }
-
-                  override fun onBindViewHolder(holder: VH, position: Int) {
-                      val item = items[position]
-                      holder.ivIcon.setImageDrawable(item.icon)
-                      holder.tvAppName.text = item.appName
-                      holder.tvCacheSize.text = "Cache ${Formatter.formatFileSize(this@MainActivity, item.cacheBytes)}"
-                      holder.cbSelect.setOnCheckedChangeListener(null)
-                      holder.cbSelect.isChecked = item.selected
-                      holder.cbSelect.setOnCheckedChangeListener { _, isChecked ->
-                          item.selected = isChecked
-                      }
-                  }
-
-                  override fun getItemCount(): Int = items.size
+                  override fun getItemCount() = items.size
               }
           }
           EOF
@@ -593,4 +681,3 @@ jobs:
         with:
           name: com.ttz.ttz-debug-apk
           path: app/build/outputs/apk/debug/app-debug.apk
-
