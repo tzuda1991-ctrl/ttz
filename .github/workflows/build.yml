@@ -1,4 +1,4 @@
-name: Build TTZ Cleaner APK
+name: Build TTZ Cleaner Pro APK
 
 on:
   push:
@@ -58,8 +58,8 @@ jobs:
                   applicationId "com.ttz.ttz"
                   minSdk 26
                   targetSdk 34
-                  versionCode 3
-                  versionName "3.0"
+                  versionCode 5
+                  versionName "5.0-UltraPro"
               }
               compileOptions {
                   sourceCompatibility JavaVersion.VERSION_17
@@ -75,17 +75,79 @@ jobs:
           }
           EOF
 
+          # Custom App Logo Vector
+          cat << 'EOF' > app/src/main/res/drawable/ic_ttz_logo.xml
+          <?xml version="1.0" encoding="utf-8"?>
+          <vector xmlns:android="http://schemas.android.com/apk/res/android"
+              android:width="108dp"
+              android:height="108dp"
+              android:viewportWidth="108"
+              android:viewportHeight="108">
+              <path
+                  android:fillColor="#15192B"
+                  android:pathData="M0,0h108v108h-108z" />
+              <path
+                  android:fillColor="#1E2540"
+                  android:pathData="M54,12 A42,42 0 1,1 53.9,12 Z" />
+              <path
+                  android:strokeColor="#00E5FF"
+                  android:strokeWidth="3.5"
+                  android:pathData="M54,16 A38,38 0 1,1 53.9,16 Z" />
+              <path
+                  android:fillColor="#00E676"
+                  android:pathData="M58,24 L34,58 L51,58 L46,84 L74,48 L56,48 Z" />
+          </vector>
+          EOF
+
+          cat << 'EOF' > app/src/main/res/drawable/bg_card.xml
+          <?xml version="1.0" encoding="utf-8"?>
+          <shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="rectangle">
+              <solid android:color="#1B2030" />
+              <corners android:radius="18dp" />
+              <stroke android:width="1dp" android:color="#2E3750" />
+          </shape>
+          EOF
+
+          cat << 'EOF' > app/src/main/res/drawable/bg_item_card.xml
+          <?xml version="1.0" encoding="utf-8"?>
+          <shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="rectangle">
+              <solid android:color="#171B26" />
+              <corners android:radius="14dp" />
+              <stroke android:width="1dp" android:color="#252B3B" />
+          </shape>
+          EOF
+
+          cat << 'EOF' > app/src/main/res/drawable/bg_overlay.xml
+          <?xml version="1.0" encoding="utf-8"?>
+          <shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="rectangle">
+              <solid android:color="#F2141824" />
+              <corners android:radius="18dp" />
+              <stroke android:width="1.5dp" android:color="#00E5FF" />
+          </shape>
+          EOF
+
+          cat << 'EOF' > app/src/main/res/drawable/bg_badge.xml
+          <?xml version="1.0" encoding="utf-8"?>
+          <shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="rectangle">
+              <solid android:color="#26324B" />
+              <corners android:radius="8dp" />
+          </shape>
+          EOF
+
           cat << 'EOF' > app/src/main/AndroidManifest.xml
           <?xml version="1.0" encoding="utf-8"?>
           <manifest xmlns:android="http://schemas.android.com/apk/res/android"
               xmlns:tools="http://schemas.android.com/tools">
               <uses-permission android:name="android.permission.PACKAGE_USAGE_STATS" tools:ignore="ProtectedPermissions" />
               <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES" tools:ignore="QueryAllPackagesPermission" />
+              <uses-permission android:name="android.permission.KILL_BACKGROUND_PROCESSES" />
               <application
                   android:allowBackup="true"
-                  android:label="TTZ Cleaner"
+                  android:icon="@drawable/ic_ttz_logo"
+                  android:roundIcon="@drawable/ic_ttz_logo"
+                  android:label="TTZ Cleaner Pro"
                   android:supportsRtl="true"
-                  android:theme="@style/Theme.MaterialComponents.DayNight.DarkActionBar">
+                  android:theme="@style/Theme.MaterialComponents.DayNight.NoActionBar">
                   <activity android:name=".MainActivity" android:exported="true">
                       <intent-filter>
                           <action android:name="android.intent.action.MAIN" />
@@ -122,52 +184,21 @@ jobs:
 
           cat << 'EOF' > app/src/main/res/values/strings.xml
           <resources>
-              <string name="app_name">TTZ Cleaner</string>
-              <string name="acc_desc">Auto-clicks Storage and Clear Cache buttons.</string>
+              <string name="app_name">TTZ Cleaner Pro</string>
+              <string name="acc_desc">Safely clears app cache, hibernates laggy apps, and sets 0.5x UI speed.</string>
           </resources>
           EOF
 
-          cat << 'EOF' > app/src/main/res/drawable/bg_overlay.xml
-          <?xml version="1.0" encoding="utf-8"?>
-          <shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="rectangle">
-              <solid android:color="#EE1E1F22" />
-              <corners android:radius="14dp" />
-              <stroke android:width="1dp" android:color="#55FFFFFF" />
-          </shape>
-          EOF
-
+          # Upgraded Floating Window UI
           cat << 'EOF' > app/src/main/res/layout/overlay_progress.xml
           <?xml version="1.0" encoding="utf-8"?>
           <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:layout_width="250dp"
+              android:layout_width="290dp"
               android:layout_height="wrap_content"
               android:background="@drawable/bg_overlay"
               android:orientation="vertical"
-              android:padding="12dp">
-              <ProgressBar
-                  android:id="@+id/pbOverlay"
-                  style="?android:attr/progressBarStyleHorizontal"
-                  android:layout_width="match_parent"
-                  android:layout_height="4dp"
-                  android:max="100"
-                  android:progress="20"
-                  android:progressTint="#8AB4F8" />
-              <TextView
-                  android:id="@+id/tvStepStatus"
-                  android:layout_width="match_parent"
-                  android:layout_height="wrap_content"
-                  android:layout_marginTop="8dp"
-                  android:gravity="center"
-                  android:text="#1, wait 1s"
-                  android:textColor="#FFFFFF"
-                  android:textSize="13sp"
-                  android:textStyle="bold" />
-              <View
-                  android:layout_width="match_parent"
-                  android:layout_height="1dp"
-                  android:layout_marginTop="8dp"
-                  android:layout_marginBottom="8dp"
-                  android:background="#33FFFFFF" />
+              android:padding="14dp">
+
               <LinearLayout
                   android:layout_width="match_parent"
                   android:layout_height="wrap_content"
@@ -177,9 +208,60 @@ jobs:
                       android:id="@+id/tvCount"
                       android:layout_width="wrap_content"
                       android:layout_height="wrap_content"
-                      android:text="1 / 1"
-                      android:textColor="#CCCCCC"
-                      android:textSize="13sp" />
+                      android:background="@drawable/bg_badge"
+                      android:paddingStart="8dp"
+                      android:paddingTop="3dp"
+                      android:paddingEnd="8dp"
+                      android:paddingBottom="3dp"
+                      android:text="1 / 10"
+                      android:textColor="#00E5FF"
+                      android:textSize="12sp"
+                      android:textStyle="bold" />
+                  <TextView
+                      android:id="@+id/tvStepStatus"
+                      android:layout_width="0dp"
+                      android:layout_height="wrap_content"
+                      android:layout_marginStart="8dp"
+                      android:layout_weight="1"
+                      android:text="#1, wait 1s"
+                      android:textColor="#FFD54F"
+                      android:textSize="12sp"
+                      android:textStyle="bold" />
+                  <Button
+                      android:id="@+id/btnStopOverlay"
+                      android:layout_width="56dp"
+                      android:layout_height="30dp"
+                      android:backgroundTint="#E53935"
+                      android:insetTop="0dp"
+                      android:insetBottom="0dp"
+                      android:padding="0dp"
+                      android:text="STOP"
+                      android:textColor="#FFFFFF"
+                      android:textSize="10sp"
+                      android:textStyle="bold" />
+              </LinearLayout>
+
+              <ProgressBar
+                  android:id="@+id/pbOverlay"
+                  style="?android:attr/progressBarStyleHorizontal"
+                  android:layout_width="match_parent"
+                  android:layout_height="6dp"
+                  android:layout_marginTop="8dp"
+                  android:max="100"
+                  android:progress="25"
+                  android:progressTint="#00E676" />
+
+              <LinearLayout
+                  android:layout_width="match_parent"
+                  android:layout_height="wrap_content"
+                  android:layout_marginTop="10dp"
+                  android:gravity="center_vertical"
+                  android:orientation="horizontal">
+                  <ImageView
+                      android:id="@+id/ivOverlayIcon"
+                      android:layout_width="28dp"
+                      android:layout_height="28dp"
+                      android:src="@drawable/ic_ttz_logo" />
                   <TextView
                       android:id="@+id/tvCurrentApp"
                       android:layout_width="0dp"
@@ -187,81 +269,245 @@ jobs:
                       android:layout_marginStart="10dp"
                       android:layout_weight="1"
                       android:ellipsize="end"
-                      android:gravity="center"
-                      android:maxLines="2"
-                      android:text="Clear cache..."
-                      android:textColor="#CCCCCC"
-                      android:textSize="13sp" />
+                      android:maxLines="1"
+                      android:text="Clear cache: Maps"
+                      android:textColor="#FFFFFF"
+                      android:textSize="13sp"
+                      android:textStyle="bold" />
               </LinearLayout>
           </LinearLayout>
           EOF
 
+          # Modern Dashboard UI
           cat << 'EOF' > app/src/main/res/layout/activity_main.xml
           <?xml version="1.0" encoding="utf-8"?>
           <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
               android:layout_width="match_parent"
               android:layout_height="match_parent"
-              android:background="#1E1F22"
+              android:background="#0F121A"
               android:orientation="vertical"
-              android:padding="16dp">
+              android:padding="14dp">
+
+              <!-- Top Brand Header -->
               <LinearLayout
                   android:layout_width="match_parent"
                   android:layout_height="wrap_content"
-                  android:background="#2B2D30"
+                  android:gravity="center_vertical"
+                  android:orientation="horizontal"
+                  android:paddingBottom="10dp">
+                  <ImageView
+                      android:layout_width="38dp"
+                      android:layout_height="38dp"
+                      android:src="@drawable/ic_ttz_logo" />
+                  <LinearLayout
+                      android:layout_width="0dp"
+                      android:layout_height="wrap_content"
+                      android:layout_marginStart="10dp"
+                      android:layout_weight="1"
+                      android:orientation="vertical">
+                      <TextView
+                          android:layout_width="wrap_content"
+                          android:layout_height="wrap_content"
+                          android:text="TTZ Cleaner Pro"
+                          android:textColor="#FFFFFF"
+                          android:textSize="18sp"
+                          android:textStyle="bold" />
+                      <TextView
+                          android:layout_width="wrap_content"
+                          android:layout_height="wrap_content"
+                          android:text="100% Safe System Optimizer &amp; Turbo Cleaner"
+                          android:textColor="#00E5FF"
+                          android:textSize="11sp" />
+                  </LinearLayout>
+              </LinearLayout>
+
+              <!-- Storage & RAM Meter Card -->
+              <LinearLayout
+                  android:layout_width="match_parent"
+                  android:layout_height="wrap_content"
+                  android:background="@drawable/bg_card"
                   android:orientation="vertical"
-                  android:padding="16dp">
-                  <TextView
-                      android:id="@+id/tvStorageStats"
+                  android:padding="14dp">
+
+                  <!-- Storage Row -->
+                  <LinearLayout
                       android:layout_width="match_parent"
                       android:layout_height="wrap_content"
-                      android:text="Calculating Storage..."
-                      android:textColor="#FFFFFF"
-                      android:textSize="15sp"
-                      android:textStyle="bold" />
+                      android:orientation="horizontal">
+                      <TextView
+                          android:layout_width="0dp"
+                          android:layout_height="wrap_content"
+                          android:layout_weight="1"
+                          android:text="INTERNAL STORAGE"
+                          android:textColor="#90A4AE"
+                          android:textSize="11sp"
+                          android:textStyle="bold" />
+                      <TextView
+                          android:id="@+id/tvStorageStats"
+                          android:layout_width="wrap_content"
+                          android:layout_height="wrap_content"
+                          android:text="Calculating..."
+                          android:textColor="#FFFFFF"
+                          android:textSize="12sp"
+                          android:textStyle="bold" />
+                  </LinearLayout>
+                  <ProgressBar
+                      android:id="@+id/pbStorage"
+                      style="?android:attr/progressBarStyleHorizontal"
+                      android:layout_width="match_parent"
+                      android:layout_height="7dp"
+                      android:layout_marginTop="4dp"
+                      android:max="100"
+                      android:progress="50"
+                      android:progressTint="#FF5252" />
+
+                  <!-- RAM Row -->
+                  <LinearLayout
+                      android:layout_width="match_parent"
+                      android:layout_height="wrap_content"
+                      android:layout_marginTop="10dp"
+                      android:orientation="horizontal">
+                      <TextView
+                          android:layout_width="0dp"
+                          android:layout_height="wrap_content"
+                          android:layout_weight="1"
+                          android:text="LIVE RAM MEMORY"
+                          android:textColor="#90A4AE"
+                          android:textSize="11sp"
+                          android:textStyle="bold" />
+                      <TextView
+                          android:id="@+id/tvRamStats"
+                          android:layout_width="wrap_content"
+                          android:layout_height="wrap_content"
+                          android:text="Calculating..."
+                          android:textColor="#00E676"
+                          android:textSize="12sp"
+                          android:textStyle="bold" />
+                  </LinearLayout>
+                  <ProgressBar
+                      android:id="@+id/pbRam"
+                      style="?android:attr/progressBarStyleHorizontal"
+                      android:layout_width="match_parent"
+                      android:layout_height="7dp"
+                      android:layout_marginTop="4dp"
+                      android:max="100"
+                      android:progress="50"
+                      android:progressTint="#00E676" />
+
                   <TextView
                       android:id="@+id/tvTotalCache"
                       android:layout_width="match_parent"
                       android:layout_height="wrap_content"
-                      android:layout_marginTop="8dp"
-                      android:text="CACHE SIZE: 0 MB"
-                      android:textColor="#FBC02D"
-                      android:textSize="15sp"
+                      android:layout_marginTop="10dp"
+                      android:gravity="center"
+                      android:text="LARGE CACHE: Tap 'Scan' to detect junk"
+                      android:textColor="#FFD54F"
+                      android:textSize="14sp"
                       android:textStyle="bold" />
+
+                  <!-- 4 Tool Buttons Grid -->
                   <LinearLayout
                       android:layout_width="match_parent"
                       android:layout_height="wrap_content"
-                      android:layout_marginTop="12dp"
+                      android:layout_marginTop="10dp"
                       android:orientation="horizontal">
                       <Button
                           android:id="@+id/btnPermissions"
                           android:layout_width="0dp"
-                          android:layout_height="wrap_content"
+                          android:layout_height="40dp"
                           android:layout_weight="1"
-                          android:text="1. Permissions" />
-                      <Space android:layout_width="8dp" android:layout_height="wrap_content" />
+                          android:backgroundTint="#37474F"
+                          android:insetTop="0dp"
+                          android:insetBottom="0dp"
+                          android:padding="2dp"
+                          android:text="🔑 Perms"
+                          android:textColor="#FFFFFF"
+                          android:textSize="10sp" />
+                      <Space android:layout_width="6dp" android:layout_height="wrap_content" />
                       <Button
                           android:id="@+id/btnScan"
                           android:layout_width="0dp"
-                          android:layout_height="wrap_content"
+                          android:layout_height="40dp"
                           android:layout_weight="1"
-                          android:text="2. Scan Apps" />
+                          android:backgroundTint="#0288D1"
+                          android:insetTop="0dp"
+                          android:insetBottom="0dp"
+                          android:padding="2dp"
+                          android:text="🔍 Scan"
+                          android:textColor="#FFFFFF"
+                          android:textSize="10sp" />
+                      <Space android:layout_width="6dp" android:layout_height="wrap_content" />
+                      <Button
+                          android:id="@+id/btnRamBoost"
+                          android:layout_width="0dp"
+                          android:layout_height="40dp"
+                          android:layout_weight="1"
+                          android:backgroundTint="#2E7D32"
+                          android:insetTop="0dp"
+                          android:insetBottom="0dp"
+                          android:padding="2dp"
+                          android:text="🚀 RAM"
+                          android:textColor="#FFFFFF"
+                          android:textSize="10sp" />
+                      <Space android:layout_width="6dp" android:layout_height="wrap_content" />
+                      <Button
+                          android:id="@+id/btnUiSpeed"
+                          android:layout_width="0dp"
+                          android:layout_height="40dp"
+                          android:layout_weight="1"
+                          android:backgroundTint="#7B1FA2"
+                          android:insetTop="0dp"
+                          android:insetBottom="0dp"
+                          android:padding="2dp"
+                          android:text="⚡ 0.5x UI"
+                          android:textColor="#FFFFFF"
+                          android:textSize="10sp" />
                   </LinearLayout>
               </LinearLayout>
+
+              <TextView
+                  android:layout_width="match_parent"
+                  android:layout_height="wrap_content"
+                  android:layout_marginTop="8dp"
+                  android:layout_marginBottom="4dp"
+                  android:text="🛡️ System files are 100% untouched. Tap 🛡️ to protect any app."
+                  android:textColor="#78909C"
+                  android:textSize="11sp" />
+
               <androidx.recyclerview.widget.RecyclerView
                   android:id="@+id/rvApps"
                   android:layout_width="match_parent"
                   android:layout_height="0dp"
-                  android:layout_marginTop="12dp"
                   android:layout_weight="1" />
-              <Button
-                  android:id="@+id/btnCleanAll"
+
+              <!-- Bottom Action Bar -->
+              <LinearLayout
                   android:layout_width="match_parent"
-                  android:layout_height="56dp"
+                  android:layout_height="wrap_content"
                   android:layout_marginTop="8dp"
-                  android:backgroundTint="#5C6BC0"
-                  android:text="3. Auto Clean Cache (Turbo)"
-                  android:textColor="#FFFFFF"
-                  android:textStyle="bold" />
+                  android:orientation="horizontal">
+                  <Button
+                      android:id="@+id/btnCleanAll"
+                      android:layout_width="0dp"
+                      android:layout_height="52dp"
+                      android:layout_weight="1"
+                      android:backgroundTint="#3949AB"
+                      android:text="🧹 Clean Cache"
+                      android:textColor="#FFFFFF"
+                      android:textSize="12sp"
+                      android:textStyle="bold" />
+                  <Space android:layout_width="8dp" android:layout_height="wrap_content" />
+                  <Button
+                      android:id="@+id/btnHibernateAll"
+                      android:layout_width="0dp"
+                      android:layout_height="52dp"
+                      android:layout_weight="1"
+                      android:backgroundTint="#E65100"
+                      android:text="❄️ Force Stop (Lag Fix)"
+                      android:textColor="#FFFFFF"
+                      android:textSize="12sp"
+                      android:textStyle="bold" />
+              </LinearLayout>
           </LinearLayout>
           EOF
 
@@ -270,19 +516,28 @@ jobs:
           <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
               android:layout_width="match_parent"
               android:layout_height="wrap_content"
+              android:layout_marginBottom="6dp"
+              android:background="@drawable/bg_item_card"
               android:gravity="center_vertical"
               android:orientation="horizontal"
               android:padding="10dp">
-              <ImageView android:id="@+id/ivIcon" android:layout_width="40dp" android:layout_height="40dp" />
+              <ImageView android:id="@+id/ivIcon" android:layout_width="42dp" android:layout_height="42dp" />
               <LinearLayout
                   android:layout_width="0dp"
                   android:layout_height="wrap_content"
                   android:layout_marginStart="12dp"
                   android:layout_weight="1"
                   android:orientation="vertical">
-                  <TextView android:id="@+id/tvAppName" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="#FFFFFF" android:textSize="15sp" android:textStyle="bold" />
-                  <TextView android:id="@+id/tvCacheSize" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="#AAAAAA" android:textSize="13sp" />
+                  <TextView android:id="@+id/tvAppName" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="#FFFFFF" android:textSize="14sp" android:textStyle="bold" />
+                  <TextView android:id="@+id/tvCacheSize" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="2dp" android:textColor="#00E5FF" android:textSize="12sp" />
               </LinearLayout>
+              <TextView
+                  android:id="@+id/btnIgnoreToggle"
+                  android:layout_width="wrap_content"
+                  android:layout_height="wrap_content"
+                  android:padding="8dp"
+                  android:text="🛡️"
+                  android:textSize="17sp" />
               <CheckBox android:id="@+id/cbSelect" android:layout_width="wrap_content" android:layout_height="wrap_content" android:checked="true" />
           </LinearLayout>
           EOF
@@ -307,6 +562,8 @@ jobs:
           import android.view.WindowManager
           import android.view.accessibility.AccessibilityEvent
           import android.view.accessibility.AccessibilityNodeInfo
+          import android.widget.Button
+          import android.widget.ImageView
           import android.widget.ProgressBar
           import android.widget.TextView
           import android.widget.Toast
@@ -316,7 +573,8 @@ jobs:
           class CacheCleanerService : AccessibilityService() {
               companion object {
                   var instance: CacheCleanerService? = null
-                  var isCleaning = false
+                  var isRunning = false
+                  var mode = "CACHE" // "CACHE", "HIBERNATE", or "DEV_SPEED"
                   val queue = mutableListOf<CleanTarget>()
                   var totalToClean = 0
                   var currentIndex = 0
@@ -329,15 +587,27 @@ jobs:
               private var tvStepStatus: TextView? = null
               private var tvCount: TextView? = null
               private var tvCurrentApp: TextView? = null
+              private var ivOverlayIcon: ImageView? = null
               private var currentTarget: CleanTarget? = null
               private var step = 0
               private var subTick = 0
+              private var animIndex = 0
+
+              private val animTargets = listOf(
+                  "Window animation scale",
+                  "Transition animation scale",
+                  "Animator duration scale"
+              )
 
               private val ticker = object : Runnable {
                   override fun run() {
-                      if (!isCleaning) return
+                      if (!isRunning) return
                       subTick++
-                      runAutomationTick()
+                      when (mode) {
+                          "HIBERNATE" -> runHibernateTick()
+                          "DEV_SPEED" -> runDevSpeedTick()
+                          else -> runCacheTick()
+                      }
                       handler.postDelayed(this, 550)
                   }
               }
@@ -345,21 +615,36 @@ jobs:
               override fun onServiceConnected() { super.onServiceConnected(); instance = this }
               override fun onUnbind(intent: Intent?): Boolean { instance = null; hideOverlay(); return super.onUnbind(intent) }
               override fun onAccessibilityEvent(event: AccessibilityEvent?) {}
-              override fun onInterrupt() { stopCleaning() }
+              override fun onInterrupt() { stopProcess() }
 
-              fun startCleaningProcess() {
-                  if (queue.isEmpty()) return
-                  isCleaning = true
-                  totalToClean = queue.size
-                  currentIndex = 0
+              fun startProcess(selectedMode: String) {
+                  mode = selectedMode
+                  isRunning = true
                   showOverlay()
-                  launchNextApp()
+                  if (mode == "DEV_SPEED") {
+                      totalToClean = 3
+                      currentIndex = 1
+                      step = 0
+                      subTick = 0
+                      animIndex = 0
+                      updateOverlayCustom("1 / 3", "Tuning UI Speed...", "Window animation -> .5x", 25)
+                      val intent = Intent(Settings.ACTION_APPLICATION_DEVELOPMENT_SETTINGS).apply {
+                          addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                      }
+                      startActivity(intent)
+                  } else {
+                      if (queue.isEmpty()) { stopProcess(); return }
+                      totalToClean = queue.size
+                      currentIndex = 0
+                      launchNextApp()
+                  }
                   handler.removeCallbacks(ticker)
-                  handler.postDelayed(ticker, 700)
+                  handler.postDelayed(ticker, 750)
               }
 
-              fun stopCleaning() {
-                  isCleaning = false
+              fun stopProcess() {
+                  isRunning = false
+                  queue.clear()
                   handler.removeCallbacks(ticker)
                   hideOverlay()
               }
@@ -373,6 +658,11 @@ jobs:
                       tvStepStatus = overlayView?.findViewById(R.id.tvStepStatus)
                       tvCount = overlayView?.findViewById(R.id.tvCount)
                       tvCurrentApp = overlayView?.findViewById(R.id.tvCurrentApp)
+                      ivOverlayIcon = overlayView?.findViewById(R.id.ivOverlayIcon)
+                      overlayView?.findViewById<Button>(R.id.btnStopOverlay)?.setOnClickListener {
+                          stopProcess()
+                          Toast.makeText(this, "Stopped by user", Toast.LENGTH_SHORT).show()
+                      }
 
                       val params = WindowManager.LayoutParams(
                           WindowManager.LayoutParams.WRAP_CONTENT,
@@ -382,8 +672,8 @@ jobs:
                           PixelFormat.TRANSLUCENT
                       ).apply {
                           gravity = Gravity.BOTTOM or Gravity.END
-                          x = 32
-                          y = 140
+                          x = 24
+                          y = 130
                       }
                       windowManager?.addView(overlayView, params)
                   } catch (_: Exception) {}
@@ -395,7 +685,23 @@ jobs:
                       pbOverlay?.progress = progress
                       tvStepStatus?.text = stepText
                       tvCount?.text = "$currentIndex / $totalToClean"
-                      tvCurrentApp?.text = "Clear cache: ${t.appName}"
+                      val prefix = if (mode == "HIBERNATE") "Force stop:" else "Clear cache:"
+                      tvCurrentApp?.text = "$prefix ${t.appName}"
+                      try {
+                          ivOverlayIcon?.setImageDrawable(packageManager.getApplicationIcon(t.packageName))
+                      } catch (_: Exception) {
+                          ivOverlayIcon?.setImageResource(R.drawable.ic_ttz_logo)
+                      }
+                  }
+              }
+
+              private fun updateOverlayCustom(countTxt: String, stepTxt: String, titleTxt: String, progress: Int) {
+                  handler.post {
+                      tvCount?.text = countTxt
+                      tvStepStatus?.text = stepTxt
+                      tvCurrentApp?.text = titleTxt
+                      pbOverlay?.progress = progress
+                      ivOverlayIcon?.setImageResource(R.drawable.ic_ttz_logo)
                   }
               }
 
@@ -409,9 +715,9 @@ jobs:
               }
 
               private fun launchNextApp() {
-                  if (queue.isEmpty()) {
-                      stopCleaning()
-                      Toast.makeText(this, "All selected caches cleared!", Toast.LENGTH_LONG).show()
+                  if (!isRunning || queue.isEmpty()) {
+                      stopProcess()
+                      Toast.makeText(this, "✅ Task Complete! Your phone is clean & smooth.", Toast.LENGTH_LONG).show()
                       return
                   }
                   currentTarget = queue.removeAt(0)
@@ -427,27 +733,66 @@ jobs:
                   startActivity(intent)
               }
 
-              private fun runAutomationTick() {
+              // Auto-tunes Developer Options Animation Scales to .5x safely
+              private fun runDevSpeedTick() {
+                  val root = rootInActiveWindow ?: return
+                  if (animIndex >= animTargets.size) {
+                      performGlobalAction(GLOBAL_ACTION_BACK)
+                      stopProcess()
+                      Toast.makeText(this, "⚡ 0.5x Ultra UI Speed Activated!", Toast.LENGTH_LONG).show()
+                      return
+                  }
+                  val currentAnimTitle = animTargets[animIndex]
+                  val prog = ((animIndex + 1) * 33)
+
+                  if (step == 0) {
+                      updateOverlayCustom("${animIndex + 1} / 3", "Finding setting...", currentAnimTitle, prog)
+                      if (findAndClickSafeNode(root, listOf(currentAnimTitle))) {
+                          step = 1
+                          subTick = 0
+                      } else {
+                          root.performAction(AccessibilityNodeInfo.ACTION_SCROLL_FORWARD)
+                          if (subTick > 18) {
+                              stopProcess()
+                              Toast.makeText(this, "Could not find animation settings. Enable Developer Options first.", Toast.LENGTH_LONG).show()
+                          }
+                      }
+                  } else if (step == 1) {
+                      updateOverlayCustom("${animIndex + 1} / 3", "Setting .5x...", currentAnimTitle, prog)
+                      if (findAndClickSafeNode(root, listOf(".5x", "0.5x"))) {
+                          animIndex++
+                          step = 0
+                          subTick = 0
+                      } else if (subTick > 5) {
+                          performGlobalAction(GLOBAL_ACTION_BACK)
+                          animIndex++
+                          step = 0
+                          subTick = 0
+                      }
+                  }
+              }
+
+              private fun runCacheTick() {
                   val root = rootInActiveWindow ?: return
                   if (step == 0) {
-                      updateOverlayUI("#$subTick, wait 5s", 35)
-                      if (hasNodeText(root, listOf("Clear cache", "Clear storage"))) {
+                      updateOverlayUI("#$subTick, wait 5s", 40)
+                      if (hasNodeText(root, listOf("Clear cache"))) {
                           step = 1; subTick = 0; return
                       }
-                      if (findAndClickNode(root, listOf("Storage & cache", "Storage", "Storage usage"))) {
+                      if (findAndClickSafeNode(root, listOf("Storage & cache", "Storage", "Storage usage"))) {
                           step = 1; subTick = 0
-                          updateOverlayUI("#3, wait 5s", 65)
+                          updateOverlayUI("#3, wait 5s", 70)
                       } else if (subTick > 5) {
                           root.performAction(AccessibilityNodeInfo.ACTION_SCROLL_FORWARD)
                       }
-                      if (subTick > 11) {
+                      if (subTick > 10) {
                           step = 2
                           performGlobalAction(GLOBAL_ACTION_BACK)
-                          handler.postDelayed({ launchNextApp() }, 500)
+                          handler.postDelayed({ launchNextApp() }, 450)
                       }
                   } else if (step == 1) {
-                      updateOverlayUI("#${subTick + 3}, wait 1s", 85)
-                      if (findAndClickNode(root, listOf("Clear cache")) || subTick > 5) {
+                      updateOverlayUI("#${subTick + 3}, wait 1s", 90)
+                      if (findAndClickSafeNode(root, listOf("Clear cache")) || subTick > 5) {
                           step = 2
                           updateOverlayUI("#9, wait 5s", 100)
                           handler.postDelayed({
@@ -461,23 +806,52 @@ jobs:
                   }
               }
 
+              private fun runHibernateTick() {
+                  val root = rootInActiveWindow ?: return
+                  if (step == 0) {
+                      updateOverlayUI("#$subTick, Force Stop", 50)
+                      if (findAndClickSafeNode(root, listOf("Force stop"))) {
+                          step = 1; subTick = 0
+                      } else if (subTick > 4) {
+                          step = 2
+                          performGlobalAction(GLOBAL_ACTION_BACK)
+                          handler.postDelayed({ launchNextApp() }, 450)
+                      }
+                  } else if (step == 1) {
+                      updateOverlayUI("#${subTick + 2}, Confirm OK", 90)
+                      if (findAndClickSafeNode(root, listOf("OK", "Force stop")) || subTick > 4) {
+                          step = 2
+                          updateOverlayUI("Done!", 100)
+                          handler.postDelayed({
+                              performGlobalAction(GLOBAL_ACTION_BACK)
+                              handler.postDelayed({ launchNextApp() }, 450)
+                          }, 450)
+                      }
+                  }
+              }
+
               private fun hasNodeText(root: AccessibilityNodeInfo, keywords: List<String>): Boolean {
                   val list = mutableListOf<AccessibilityNodeInfo>()
                   collectNodes(root, list)
                   return list.any { n ->
                       val t = n.text?.toString() ?: ""
-                      keywords.any { kw -> t.contains(kw, ignoreCase = true) }
+                      keywords.any { kw -> t.equals(kw, ignoreCase = true) || t.contains(kw, ignoreCase = true) }
                   }
               }
 
-              private fun findAndClickNode(root: AccessibilityNodeInfo, keywords: List<String>): Boolean {
+              private val forbiddenWords = listOf("Uninstall", "Clear storage", "Clear data", "Manage space", "Delete", "Archive", "Disable", "Format", "Reset")
+
+              private fun findAndClickSafeNode(root: AccessibilityNodeInfo, keywords: List<String>): Boolean {
                   val allNodes = mutableListOf<AccessibilityNodeInfo>()
                   collectNodes(root, allNodes)
                   for (kw in keywords) {
                       for (node in allNodes) {
-                          val text = node.text?.toString() ?: ""
-                          val desc = node.contentDescription?.toString() ?: ""
-                          if (text.contains(kw, ignoreCase = true) || desc.contains(kw, ignoreCase = true)) {
+                          val text = node.text?.toString()?.trim() ?: ""
+                          val desc = node.contentDescription?.toString()?.trim() ?: ""
+                          if (forbiddenWords.any { f -> text.contains(f, ignoreCase = true) || desc.contains(f, ignoreCase = true) }) {
+                              continue
+                          }
+                          if (text.equals(kw, ignoreCase = true) || text.contains(kw, ignoreCase = true)) {
                               var target: AccessibilityNodeInfo? = node
                               while (target != null && !target.isClickable) target = target.parent
                               if (target != null && target.isEnabled && target.performAction(AccessibilityNodeInfo.ACTION_CLICK)) {
@@ -509,11 +883,15 @@ jobs:
           cat << 'EOF' > app/src/main/java/com/ttz/ttz/MainActivity.kt
           package com.ttz.ttz
 
+          import android.app.ActivityManager
           import android.app.AppOpsManager
           import android.app.usage.StorageStatsManager
           import android.content.ComponentName
           import android.content.Context
           import android.content.Intent
+          import android.content.SharedPreferences
+          import android.content.pm.ApplicationInfo
+          import android.graphics.Color
           import android.graphics.drawable.Drawable
           import android.os.Bundle
           import android.os.Environment
@@ -532,37 +910,56 @@ jobs:
           import androidx.recyclerview.widget.RecyclerView
           import kotlin.concurrent.thread
 
-          data class AppCacheItem(val appName: String, val packageName: String, val icon: Drawable, val cacheBytes: Long, var selected: Boolean = true)
+          data class AppCacheItem(
+              val appName: String,
+              val packageName: String,
+              val icon: Drawable,
+              val cacheBytes: Long,
+              var selected: Boolean = true,
+              var isIgnored: Boolean = false
+          )
 
           class MainActivity : AppCompatActivity() {
               private lateinit var tvStorageStats: TextView
+              private lateinit var tvRamStats: TextView
               private lateinit var tvTotalCache: TextView
+              private lateinit var pbStorage: ProgressBar
+              private lateinit var pbRam: ProgressBar
               private lateinit var rvApps: RecyclerView
+              private lateinit var prefs: SharedPreferences
               private val appList = mutableListOf<AppCacheItem>()
               private lateinit var adapter: AppAdapter
+
+              private val criticalPackages = setOf(
+                  "android", "com.android.systemui", "com.android.settings",
+                  "com.android.phone", "com.android.providers.settings",
+                  "com.android.providers.media", "com.google.android.gms"
+              )
 
               override fun onCreate(savedInstanceState: Bundle?) {
                   super.onCreate(savedInstanceState)
                   setContentView(R.layout.activity_main)
+                  prefs = getSharedPreferences("ttz_safe_prefs", Context.MODE_PRIVATE)
+
                   tvStorageStats = findViewById(R.id.tvStorageStats)
+                  tvRamStats = findViewById(R.id.tvRamStats)
                   tvTotalCache = findViewById(R.id.tvTotalCache)
+                  pbStorage = findViewById(R.id.pbStorage)
+                  pbRam = findViewById(R.id.pbRam)
                   rvApps = findViewById(R.id.rvApps)
                   adapter = AppAdapter(appList)
                   rvApps.layoutManager = LinearLayoutManager(this)
                   rvApps.adapter = adapter
 
-                  val stat = StatFs(Environment.getDataDirectory().path)
-                  val used = stat.totalBytes - stat.availableBytes
-                  val pct = ((used.toDouble() / stat.totalBytes.toDouble()) * 100).toInt()
-                  tvStorageStats.text = "TOTAL: ${Formatter.formatFileSize(this, stat.totalBytes)} | USED: ${Formatter.formatFileSize(this, used)} ($pct%) | FREE: ${Formatter.formatFileSize(this, stat.availableBytes)}"
+                  refreshDashboardStats()
 
                   findViewById<Button>(R.id.btnPermissions).setOnClickListener {
                       if (!hasUsageStatsPermission()) {
                           startActivity(Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS))
-                          Toast.makeText(this, "Enable Usage Access for TTZ Cleaner", Toast.LENGTH_LONG).show()
+                          Toast.makeText(this, "Step 1: Enable Usage Access for TTZ Cleaner", Toast.LENGTH_LONG).show()
                       } else {
                           startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))
-                          Toast.makeText(this, "Enable TTZ Auto Cache Cleaner in Accessibility", Toast.LENGTH_LONG).show()
+                          Toast.makeText(this, "Step 2: Enable TTZ Auto Cache Cleaner", Toast.LENGTH_LONG).show()
                       }
                   }
 
@@ -571,30 +968,109 @@ jobs:
                           startActivity(Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS))
                           return@setOnClickListener
                       }
-                      scanInstalledApps()
+                      scanSafeUserApps()
+                  }
+
+                  findViewById<Button>(R.id.btnRamBoost).setOnClickListener {
+                      quickRamBoost()
+                  }
+
+                  findViewById<Button>(R.id.btnUiSpeed).setOnClickListener {
+                      triggerUiSpeedBoost()
                   }
 
                   findViewById<Button>(R.id.btnCleanAll).setOnClickListener {
-                      if (!isAccessibilityEnabled()) {
-                          Toast.makeText(this, "Turn ON 'TTZ Auto Cache Cleaner' in Accessibility!", Toast.LENGTH_LONG).show()
-                          startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))
-                          return@setOnClickListener
-                      }
-                      val selected = appList.filter { it.selected }.map { CleanTarget(it.appName, it.packageName) }
-                      if (selected.isEmpty()) {
-                          Toast.makeText(this, "Scan apps first!", Toast.LENGTH_SHORT).show()
-                          return@setOnClickListener
-                      }
-                      val svc = CacheCleanerService.instance
-                      if (svc == null) {
-                          Toast.makeText(this, "Please turn Accessibility OFF and ON once.", Toast.LENGTH_LONG).show()
-                          startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))
-                          return@setOnClickListener
-                      }
-                      CacheCleanerService.queue.clear()
-                      CacheCleanerService.queue.addAll(selected)
-                      svc.startCleaningProcess()
+                      triggerAccessibilityTask("CACHE")
                   }
+
+                  findViewById<Button>(R.id.btnHibernateAll).setOnClickListener {
+                      triggerAccessibilityTask("HIBERNATE")
+                  }
+              }
+
+              override fun onResume() {
+                  super.onResume()
+                  refreshDashboardStats()
+              }
+
+              private fun refreshDashboardStats() {
+                  val stat = StatFs(Environment.getDataDirectory().path)
+                  val used = stat.totalBytes - stat.availableBytes
+                  val pct = ((used.toDouble() / stat.totalBytes.toDouble()) * 100).toInt()
+                  pbStorage.progress = pct
+                  tvStorageStats.text = "${Formatter.formatFileSize(this, used)} / ${Formatter.formatFileSize(this, stat.totalBytes)} ($pct%)"
+
+                  val am = getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
+                  val memInfo = ActivityManager.MemoryInfo()
+                  am.getMemoryInfo(memInfo)
+                  val usedRam = memInfo.totalMem - memInfo.availMem
+                  val ramPct = ((usedRam.toDouble() / memInfo.totalMem.toDouble()) * 100).toInt()
+                  pbRam.progress = ramPct
+                  tvRamStats.text = "${Formatter.formatFileSize(this, usedRam)} / ${Formatter.formatFileSize(this, memInfo.totalMem)} ($ramPct%)"
+              }
+
+              private fun quickRamBoost() {
+                  val am = getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
+                  val memBefore = ActivityManager.MemoryInfo().also { am.getMemoryInfo(it) }.availMem
+                  val pm = packageManager
+                  val ignored = prefs.getStringSet("ignored_pkgs", emptySet()) ?: emptySet()
+                  var count = 0
+                  for (app in pm.getInstalledApplications(0)) {
+                      val isSystem = (app.flags and ApplicationInfo.FLAG_SYSTEM) != 0
+                      if (!isSystem && app.packageName != packageName && !ignored.contains(app.packageName)) {
+                          try {
+                              am.killBackgroundProcesses(app.packageName)
+                              count++
+                          } catch (_: Exception) {}
+                      }
+                  }
+                  refreshDashboardStats()
+                  val memAfter = ActivityManager.MemoryInfo().also { am.getMemoryInfo(it) }.availMem
+                  val freed = if (memAfter > memBefore) memAfter - memBefore else 0L
+                  Toast.makeText(this, "🚀 Cleared $count background processes! Freed ${Formatter.formatFileSize(this, freed)}", Toast.LENGTH_LONG).show()
+              }
+
+              private fun triggerUiSpeedBoost() {
+                  val devEnabled = Settings.Global.getInt(contentResolver, Settings.Global.DEVELOPMENT_SETTINGS_ENABLED, 0) != 0
+                  if (!devEnabled) {
+                      Toast.makeText(this, "First enable Developer Options (Tap Build Number 7 times in About Phone)", Toast.LENGTH_LONG).show()
+                      startActivity(Intent(Settings.ACTION_DEVICE_INFO_SETTINGS))
+                      return
+                  }
+                  if (!isAccessibilityEnabled()) {
+                      Toast.makeText(this, "Turn ON 'TTZ Auto Cache Cleaner' in Accessibility!", Toast.LENGTH_LONG).show()
+                      startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))
+                      return
+                  }
+                  val svc = CacheCleanerService.instance
+                  if (svc == null) {
+                      Toast.makeText(this, "Please toggle Accessibility OFF and ON once.", Toast.LENGTH_LONG).show()
+                      startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))
+                      return
+                  }
+                  svc.startProcess("DEV_SPEED")
+              }
+
+              private fun triggerAccessibilityTask(taskMode: String) {
+                  if (!isAccessibilityEnabled()) {
+                      Toast.makeText(this, "Turn ON 'TTZ Auto Cache Cleaner' in Accessibility!", Toast.LENGTH_LONG).show()
+                      startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))
+                      return
+                  }
+                  val selected = appList.filter { it.selected && !it.isIgnored }.map { CleanTarget(it.appName, it.packageName) }
+                  if (selected.isEmpty()) {
+                      Toast.makeText(this, "Tap '🔍 Scan' first to load apps!", Toast.LENGTH_SHORT).show()
+                      return
+                  }
+                  val svc = CacheCleanerService.instance
+                  if (svc == null) {
+                      Toast.makeText(this, "Please toggle Accessibility OFF and ON once.", Toast.LENGTH_LONG).show()
+                      startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))
+                      return
+                  }
+                  CacheCleanerService.queue.clear()
+                  CacheCleanerService.queue.addAll(selected)
+                  svc.startProcess(taskMode)
               }
 
               private fun isAccessibilityEnabled(): Boolean {
@@ -613,10 +1089,12 @@ jobs:
                   return appOps.checkOpNoThrow(AppOpsManager.OPSTR_GET_USAGE_STATS, Process.myUid(), packageName) == AppOpsManager.MODE_ALLOWED
               }
 
-              private fun scanInstalledApps() {
-                  tvTotalCache.text = "Calculating package sizes..."
+              private fun scanSafeUserApps() {
+                  tvTotalCache.text = "Scanning packages safely..."
                   appList.clear()
                   adapter.notifyDataSetChanged()
+                  val ignoredSet = prefs.getStringSet("ignored_pkgs", emptySet())?.toMutableSet() ?: mutableSetOf()
+
                   thread {
                       val ssm = getSystemService(Context.STORAGE_STATS_SERVICE) as StorageStatsManager
                       val pm = packageManager
@@ -624,10 +1102,27 @@ jobs:
                       val temp = mutableListOf<AppCacheItem>()
                       for (app in pm.getInstalledApplications(0)) {
                           try {
-                              val cache = ssm.queryStatsForPackage(StorageManager.UUID_DEFAULT, app.packageName, Process.myUserHandle()).cacheBytes
-                              if (cache > 1024 * 1024 && app.packageName != packageName) {
-                                  totalCache += cache
-                                  temp.add(AppCacheItem(pm.getApplicationLabel(app).toString(), app.packageName, pm.getApplicationIcon(app), cache))
+                              val pkg = app.packageName
+                              if (pkg == packageName || criticalPackages.contains(pkg) || pkg.startsWith("com.android.")) continue
+
+                              val isCoreSystem = (app.flags and ApplicationInfo.FLAG_SYSTEM) != 0 &&
+                                      (app.flags and ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) == 0
+                              if (isCoreSystem) continue
+
+                              val cache = ssm.queryStatsForPackage(StorageManager.UUID_DEFAULT, pkg, Process.myUserHandle()).cacheBytes
+                              if (cache > 1024 * 1024) {
+                                  val isIgn = ignoredSet.contains(pkg)
+                                  if (!isIgn) totalCache += cache
+                                  temp.add(
+                                      AppCacheItem(
+                                          appName = pm.getApplicationLabel(app).toString(),
+                                          packageName = pkg,
+                                          icon = pm.getApplicationIcon(app),
+                                          cacheBytes = cache,
+                                          selected = !isIgn,
+                                          isIgnored = isIgn
+                                      )
+                                  )
                               }
                           } catch (_: Exception) {}
                       }
@@ -635,9 +1130,24 @@ jobs:
                       runOnUiThread {
                           appList.addAll(temp)
                           adapter.notifyDataSetChanged()
-                          tvTotalCache.text = "LARGE CACHE: ${Formatter.formatFileSize(this, totalCache)} (${appList.size} apps)"
+                          tvTotalCache.text = "LARGE CACHE: ${Formatter.formatFileSize(this, totalCache)} (${appList.count { !it.isIgnored }} apps selected)"
                       }
                   }
+              }
+
+              private fun toggleIgnore(item: AppCacheItem) {
+                  val set = prefs.getStringSet("ignored_pkgs", emptySet())?.toMutableSet() ?: mutableSetOf()
+                  if (item.isIgnored) {
+                      set.remove(item.packageName)
+                      item.isIgnored = false
+                      item.selected = true
+                  } else {
+                      set.add(item.packageName)
+                      item.isIgnored = true
+                      item.selected = false
+                  }
+                  prefs.edit().putStringSet("ignored_pkgs", set).apply()
+                  adapter.notifyDataSetChanged()
               }
 
               inner class AppAdapter(private val items: List<AppCacheItem>) : RecyclerView.Adapter<AppAdapter.VH>() {
@@ -645,16 +1155,22 @@ jobs:
                       val ivIcon: ImageView = v.findViewById(R.id.ivIcon)
                       val tvAppName: TextView = v.findViewById(R.id.tvAppName)
                       val tvCacheSize: TextView = v.findViewById(R.id.tvCacheSize)
+                      val btnIgnoreToggle: TextView = v.findViewById(R.id.btnIgnoreToggle)
                       val cbSelect: CheckBox = v.findViewById(R.id.cbSelect)
                   }
                   override fun onCreateViewHolder(p: ViewGroup, t: Int) = VH(LayoutInflater.from(p.context).inflate(R.layout.item_app, p, false))
                   override fun onBindViewHolder(h: VH, pos: Int) {
                       val item = items[pos]
                       h.ivIcon.setImageDrawable(item.icon)
-                      h.tvAppName.text = item.appName
-                      h.tvCacheSize.text = "Cache ${Formatter.formatFileSize(this@MainActivity, item.cacheBytes)}"
+                      h.tvAppName.text = if (item.isIgnored) "${item.appName} (Ignored 🛡️)" else item.appName
+                      h.tvAppName.setTextColor(if (item.isIgnored) Color.parseColor("#00E676") else Color.WHITE)
+                      h.tvCacheSize.text = "Cache: ${Formatter.formatFileSize(this@MainActivity, item.cacheBytes)}"
+                      h.btnIgnoreToggle.alpha = if (item.isIgnored) 1.0f else 0.3f
+                      h.btnIgnoreToggle.setOnClickListener { toggleIgnore(item) }
+
                       h.cbSelect.setOnCheckedChangeListener(null)
-                      h.cbSelect.isChecked = item.selected
+                      h.cbSelect.isEnabled = !item.isIgnored
+                      h.cbSelect.isChecked = item.selected && !item.isIgnored
                       h.cbSelect.setOnCheckedChangeListener { _, c -> item.selected = c }
                   }
                   override fun getItemCount() = items.size
